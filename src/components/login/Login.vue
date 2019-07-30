@@ -46,15 +46,19 @@ export default {
         }
         axios.post('http://localhost:8888/api/private/v1/login', this.loginFrom).then(res => {
           if (res.data.meta.status === 200) {
+            // 把token保存到本地
+            localStorage.setItem('token', res.data.data.token)
             this.$message({
               message: '登录成功',
-              type: 'success'
+              type: 'success',
+              duration: 800
             })
             this.$router.push('/home')
           } else {
             this.$message({
               message: '登录失败',
-              type: 'error'
+              type: 'error',
+              duration: 800
             })
           }
         })
