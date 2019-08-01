@@ -10,14 +10,14 @@
       append：后面
       prepend: 前面
      -->
-  <el-row>
+  <el-row :gutter='20'>
     <el-col :span='8'>
       <el-input v-model="input3" placeholder="请输入内容">
         <el-button slot="append" icon="el-icon-search" @click='startSearch'></el-button>
       </el-input>
     </el-col>
     <el-col :span='8'>
-      <el-button>添加用户</el-button>
+      <el-button @click='showAddUserDialog'>添加用户</el-button>
     </el-col>
   </el-row>
   <el-table :data="usersData" style="width: 100%">
@@ -28,12 +28,64 @@
     <el-table-column prop="mobile" label="电话">
     </el-table-column>
     <el-table-column label="状态">
+      <!-- 自定义列 -->
+      <template slot-scope='scope'>
+        <el-switch v-model='scope.row.mg_state' @change='stateChange(scope.row)'></el-switch>
+      </template>
     </el-table-column>
     <el-table-column label="操作">
+      <!-- 自定义列 -->
+      <template slot-scope='scope'>
+        <el-button plain size='mini' type="primary" icon="el-icon-edit" @click='showEditUserDialog(scope.row)'>
+        </el-button>
+        <el-button plain size='mini' type="danger" icon="el-icon-delete" @click='delUser(scope.row.id)'></el-button>
+        <el-button plain size='mini' type="success" icon="el-icon-check">分配角色</el-button>
+      </template>
     </el-table-column>
   </el-table>
   <!-- :page-size 决定了一共多少页 -->
   <el-pagination layout="prev, pager, next" :total="total" :page-size='2' :current-page='pagenum'
     @current-change='currentPageChange'>
   </el-pagination>
+  <!-- 添加用户对话框 -->
+  <el-dialog @closed='dialogClosed' title="添加用户" :visible.sync="dialogAddUserVisible">
+    <el-form :model="addUserForm" :rules="rules" ref="addUserRef" label-width="80px">
+      <el-form-item label="用户名" prop="username">
+        <el-input v-model="addUserForm.username" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="密码" prop="password">
+        <el-input v-model="addUserForm.password" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input v-model="addUserForm.email" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="手机" prop="mobile">
+        <el-input v-model="addUserForm.mobile" autocomplete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogAddUserVisible = false">取 消</el-button>
+      <!-- 给对话框注册close事件，监听对话框的关闭，清除表单数据 -->
+      <el-button type="primary" @click="addUser">确定</el-button>
+    </div>
+  </el-dialog>
+
+  <!-- 添加编辑对话框 -->
+  <el-dialog title="编辑用户" :visible.sync="dialogEditUserVisible">
+    <el-form :model="editUserForm" label-width="80px">
+      <el-form-item label="用户名">
+        <el-tag>{{ editUserForm.username }}</el-tag>
+      </el-form-item>
+      <el-form-item label="邮箱">
+        <el-input v-model="editUserForm.email"></el-input>
+      </el-form-item>
+      <el-form-item label="手机">
+        <el-input v-model="editUserForm.mobile"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogEditUserVisible = false">取 消</el-button>
+      <el-button type="primary" @click="editUser">确定</el-button>
+    </div>
+  </el-dialog>
 </div>

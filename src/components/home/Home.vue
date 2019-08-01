@@ -113,4 +113,8 @@
   .el-aside {
     background: #545c64;
   }
+
+  .el-main {
+    background: #EAEEF1;
+  }
 </style>
