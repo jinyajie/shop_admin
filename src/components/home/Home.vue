@@ -18,23 +18,17 @@
       <el-aside width="200px">
         <el-row>
           <el-col>
-            <el-menu :router='true' :default-active="handlerUrlPath()" class="el-menu-vertical-demo" @open="handleOpen"
-              @close="handleClose" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
-              <el-submenu index="1">
+            <el-menu :router='true' :default-active="handlerUrlPath()" class="el-menu-vertical-demo"
+              background-color="#545c64" text-color="#fff" active-text-color="#ffd04b">
+              <!-- 动态获取权限列表数据 -->
+              <el-submenu :index="item1.id+''" v-for='item1 in menusData' :key='item1.id'>
                 <template slot="title">
                   <i class="el-icon-location"></i>
-                  <span>用户管理</span>
+                  <span>{{ item1.authName }}</span>
                 </template>
-                <el-menu-item index="/users">用户列表</el-menu-item>
-              </el-submenu>
-              <el-submenu index="2">
-                <template slot="title">
-                  <i class="el-icon-location"></i>
-                  <span>权限管理</span>
-                </template>
-                <el-menu-item index="/roles">角色列表</el-menu-item>
-                <el-menu-item index="/rights">权限列表</el-menu-item>
-                s
+                <el-menu-item v-for='item2 in item1.children' :index="'/'+item2.path" :key='item2.id'>
+                  {{ item2.authName}}
+                </el-menu-item>
               </el-submenu>
             </el-menu>
           </el-col>
@@ -47,9 +41,23 @@
   </el-container>
 </template>
 <script>
-/* eslint-disable */
-  export default {
+export default {
+  /* eslint-disable */
+    data() {
+      return {
+        menusData: []
+      }
+    },
+    created() {
+      this.loadLeftMenusData()
+    },
     methods: {
+      // 加载左侧权限列表数据
+      async loadLeftMenusData() {
+        let res = await this.$axios.get('menus')
+        this.menusData = res.data.data
+        // console.log(this.menusData)
+      },
       logout() {
         this.$confirm('此操作将退出账户，是否继续？', '提示', {
           confirmButtonText: '确定',
@@ -57,12 +65,13 @@
           type: 'warning'
         }).then(() => {
           localStorage.removeItem('token')
-          //提示
+          // 提示
           this.$message({
             message: '退出成功',
             type: 'success',
             duration: 800
           })
+          this.$router.push('/login')
         }).catch(() => {
           console.log('点击取消')
           this.$message({
@@ -72,13 +81,16 @@
           })
         })
       },
-      handleOpen(key, keyPath) {
-        console.log(key, keyPath);
+      handleOpen() {
+        console.log('开了')
       },
-      handleClose(key, keyPath) {
-        console.log(key, keyPath);
+      handleClose() {
+        console.log('关了')
       },
       handlerUrlPath() {
+        if (this.$route.path === '/goods-add') {
+          return '/goods'
+        }
         return this.$route.path
       }
     }

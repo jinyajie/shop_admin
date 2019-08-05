@@ -52,11 +52,20 @@ export default {
         email: '',
         mobile: '',
         id: 0
-      }
+      },
+      dialogAssignRolesVisible: false,
+      assignRolesForm: {
+        username: '飞哥', // 用户名
+        id: 0, // 用户id
+        rid: '' // 角色id = rid
+      },
+      // select选择器
+      rolesData: []
     }
   },
   created () {
     this.getUsersData()
+    this.loadRolesData()
   },
 
   methods: {
@@ -168,7 +177,7 @@ export default {
         email,
         mobile
       }).then(res => {
-        console.log(res)
+        // console.log(res)
         this.dialogEditUserVisible = false
         if (res.data.meta.status === 200) {
           this.$message({
@@ -179,6 +188,45 @@ export default {
           this.getUsersData(this.pagenum, this.input3)
         }
       })
+    },
+    // 加载角色数据
+    async loadRolesData () {
+      // 加载角色数据
+      let res = await this.$axios.get(`roles`)
+      // console.log(res)
+      this.rolesData = res.data.data
+    },
+    // 展示分配角色对话框
+    async showAssignRolesDialog (row) {
+      this.dialogAssignRolesVisible = true
+      // console.log(row)
+      // 从row里面获取username , id, rid 赋值给 assignRoleForm
+      const { username, id } = row
+      this.assignRolesForm.username = username
+      this.assignRolesForm.id = id
+      // 缺少的rid : 使用id，再次发送请求获取rid
+      let res = await this.$axios.get(`users/${id}`)
+      console.log(res)
+      this.assignRolesForm.rid = res.data.data.rid === -1 ? '' : res.data.data.rid
+    },
+    async assignRole () {
+      // 1.从 assignRolesForm 里读取
+      const { id, rid } = this.assignRolesForm
+      // 2.发送请求
+      let res = await this.$axios.put(`users/${id}/role`, {
+        rid
+      })
+      // console.log(res)
+      if (res.data.meta.status === 200) {
+        this.dialogAssignRolesVisible = false
+        this.$message({
+          message: '分配角色成功',
+          type: 'success',
+          duration: 800
+        })
+        // 刷新一下
+        this.getUsersData(this.pagenum, this.input3)
+      }
     }
   }
 }
