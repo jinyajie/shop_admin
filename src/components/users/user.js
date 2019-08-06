@@ -64,7 +64,9 @@ export default {
     }
   },
   created () {
-    this.getUsersData()
+    // 获取url哈希值路径
+    let path = this.$route.params.path
+    this.getUsersData(path)
     this.loadRolesData()
   },
 
@@ -90,6 +92,7 @@ export default {
     },
     // 点击分页
     currentPageChange (curPage) {
+      this.$router.push('/users/' + curPage)
       // console.log('分页了', curPage)
       this.getUsersData(curPage, this.input3)
     },
